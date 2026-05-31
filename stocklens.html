@@ -1,0 +1,527 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>StockLens — Indian Market Analysis</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Mono:wght@400;500&family=Syne:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg:#0a0a0f;--bg2:#111118;--bg3:#18181f;--bg4:#1e1e28;
+  --border:rgba(255,255,255,0.07);--border2:rgba(255,255,255,0.13);
+  --text:#f0f0f5;--text2:#9191a4;--text3:#5a5a6e;
+  --accent:#6c63ff;--accent2:#8b85ff;
+  --green:#22c55e;--red:#ef4444;--amber:#f59e0b;--teal:#14b8a6;
+  --fd:'DM Serif Display',serif;--fb:'Syne',sans-serif;--fm:'DM Mono',monospace;
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{background:var(--bg);color:var(--text);font-family:var(--fb);min-height:100vh;overflow-x:hidden;}
+
+#gate{min-height:100vh;display:flex;align-items:center;justify-content:center;padding:24px;}
+.gate-card{background:var(--bg2);border:1px solid var(--border2);border-radius:24px;padding:44px 38px;max-width:560px;width:100%;text-align:center;}
+.gate-logo{font-family:var(--fd);font-size:34px;margin-bottom:6px;}
+.gate-logo span{color:var(--accent2);font-style:italic;}
+.gate-sub{color:var(--text2);font-size:14px;margin-bottom:24px;line-height:1.7;}
+
+.chrome-warn{background:rgba(245,158,11,0.1);border:1px solid rgba(245,158,11,0.3);border-radius:12px;padding:14px 18px;margin-bottom:22px;font-size:13px;color:var(--amber);line-height:1.7;text-align:left;}
+.chrome-warn strong{color:#fbbf24;display:block;margin-bottom:4px;}
+
+.steps-box{background:var(--bg3);border-radius:14px;padding:18px 22px;margin-bottom:22px;text-align:left;}
+.step{display:flex;align-items:flex-start;gap:11px;margin-bottom:12px;font-size:13px;color:var(--text2);line-height:1.6;}
+.step:last-child{margin-bottom:0;}
+.snum{width:21px;height:21px;min-width:21px;background:var(--accent);border-radius:50%;font-size:11px;font-weight:700;display:flex;align-items:center;justify-content:center;color:#fff;margin-top:1px;}
+.step a{color:var(--accent2);text-decoration:none;}
+.step a:hover{text-decoration:underline;}
+.step code{background:rgba(108,99,255,0.15);color:var(--accent2);padding:1px 6px;border-radius:4px;font-family:var(--fm);font-size:12px;}
+
+.gate-label{display:block;text-align:left;font-size:11px;font-family:var(--fm);color:var(--text3);text-transform:uppercase;letter-spacing:.5px;margin-bottom:7px;}
+.gate-input{width:100%;background:var(--bg3);border:1px solid var(--border2);border-radius:12px;padding:13px 15px;font-size:15px;font-family:var(--fm);color:var(--text);outline:none;margin-bottom:10px;transition:border-color .2s;}
+.gate-input:focus{border-color:var(--accent);}
+.gate-input::placeholder{color:var(--text3);}
+.gate-err{color:var(--red);font-size:13px;margin-bottom:10px;display:none;text-align:left;}
+.gate-btn{width:100%;background:var(--accent);color:#fff;border:none;border-radius:12px;padding:14px;font-size:15px;font-family:var(--fb);font-weight:600;cursor:pointer;transition:background .2s;margin-bottom:12px;}
+.gate-btn:hover{background:var(--accent2);}
+.gate-note{font-size:12px;color:var(--text3);line-height:1.7;}
+.gate-note a{color:var(--accent2);text-decoration:none;}
+
+.hdr{padding:16px 28px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;background:rgba(10,10,15,.93);backdrop-filter:blur(20px);z-index:100;}
+.logo{font-family:var(--fd);font-size:22px;}
+.logo span{color:var(--accent2);font-style:italic;}
+.hdr-right{display:flex;align-items:center;gap:12px;}
+.hdr-meta{font-size:12px;color:var(--text3);font-family:var(--fm);}
+.chg-btn{font-size:12px;color:var(--text3);font-family:var(--fm);background:var(--bg3);border:1px solid var(--border);border-radius:8px;padding:5px 12px;cursor:pointer;transition:color .15s,border-color .15s;}
+.chg-btn:hover{color:var(--accent2);border-color:var(--accent);}
+
+.hero{padding:52px 28px 32px;text-align:center;max-width:780px;margin:0 auto;}
+.hero h1{font-family:var(--fd);font-size:44px;line-height:1.1;margin-bottom:8px;letter-spacing:-1px;}
+.hero h1 em{color:var(--accent2);font-style:italic;}
+.hero p{color:var(--text2);font-size:15px;margin-bottom:28px;}
+.sw{position:relative;max-width:550px;margin:0 auto;}
+.si{width:100%;background:var(--bg3);border:1px solid var(--border2);border-radius:14px;padding:15px 110px 15px 48px;font-size:16px;font-family:var(--fb);color:var(--text);outline:none;transition:border-color .2s,box-shadow .2s;}
+.si::placeholder{color:var(--text3);}
+.si:focus{border-color:var(--accent);box-shadow:0 0 0 3px rgba(108,99,255,.15);}
+.si-icon{position:absolute;left:16px;top:50%;transform:translateY(-50%);color:var(--text3);font-size:18px;}
+.sb{position:absolute;right:8px;top:50%;transform:translateY(-50%);background:var(--accent);color:#fff;border:none;border-radius:10px;padding:8px 18px;font-size:13px;font-family:var(--fb);font-weight:600;cursor:pointer;}
+.sb:hover{background:var(--accent2);}
+.sugg{position:absolute;top:calc(100% + 8px);left:0;right:0;background:var(--bg3);border:1px solid var(--border2);border-radius:12px;overflow:hidden;z-index:50;display:none;}
+.sugg.show{display:block;}
+.sugg-item{padding:10px 14px;cursor:pointer;font-size:13px;display:flex;align-items:center;gap:10px;transition:background .1s;}
+.sugg-item:hover{background:var(--bg4);}
+.stk{font-family:var(--fm);font-size:11px;color:var(--accent2);background:rgba(108,99,255,.12);padding:2px 8px;border-radius:5px;min-width:88px;text-align:center;}
+.tags{display:flex;gap:8px;justify-content:center;flex-wrap:wrap;margin-top:14px;}
+.tag{background:var(--bg3);border:1px solid var(--border);border-radius:20px;padding:5px 14px;font-size:12px;color:var(--text2);cursor:pointer;transition:all .15s;}
+.tag:hover{border-color:var(--accent);color:var(--accent2);}
+
+.dash{display:none;padding:0 28px 60px;max-width:1400px;margin:0 auto;}
+.dash.show{display:block;}
+
+.shdr{background:var(--bg2);border:1px solid var(--border);border-radius:20px;padding:26px 28px;margin-bottom:22px;}
+.shdr-top{display:flex;align-items:flex-start;justify-content:space-between;gap:20px;flex-wrap:wrap;}
+.sname h2{font-family:var(--fd);font-size:32px;letter-spacing:-1px;line-height:1;}
+.sbadge{display:inline-block;margin-top:7px;font-size:11px;padding:3px 12px;border-radius:20px;background:rgba(108,99,255,.15);color:var(--accent2);font-family:var(--fm);}
+.sprice-block{text-align:right;}
+.sprice{font-family:var(--fd);font-size:38px;letter-spacing:-1px;line-height:1;}
+.sqs{display:flex;gap:24px;flex-wrap:wrap;margin-top:18px;padding-top:18px;border-top:1px solid var(--border);}
+.qi label{font-size:10px;color:var(--text3);font-family:var(--fm);text-transform:uppercase;letter-spacing:.5px;display:block;margin-bottom:3px;}
+.qi span{font-size:15px;font-weight:600;color:var(--text);}
+
+.tabs{display:flex;gap:3px;margin-bottom:22px;background:var(--bg2);padding:5px;border-radius:14px;border:1px solid var(--border);overflow-x:auto;scrollbar-width:none;}
+.tabs::-webkit-scrollbar{display:none;}
+.tbtn{flex-shrink:0;padding:8px 15px;border-radius:10px;font-size:12px;font-family:var(--fb);font-weight:500;cursor:pointer;border:none;background:transparent;color:var(--text2);transition:all .15s;}
+.tbtn:hover{color:var(--text);background:var(--bg3);}
+.tbtn.active{background:var(--accent);color:#fff;}
+.panel{display:none;}.panel.active{display:block;}
+
+.g2{display:grid;grid-template-columns:1fr 1fr;gap:18px;}
+@media(max-width:860px){.g2{grid-template-columns:1fr;}.shdr-top{flex-direction:column;}.sprice-block{text-align:left;}}
+.mb18{margin-bottom:18px;}.mt18{margin-top:18px;}
+
+.card{background:var(--bg2);border:1px solid var(--border);border-radius:16px;padding:22px;}
+.ctitle{font-size:10px;font-family:var(--fm);color:var(--text3);text-transform:uppercase;letter-spacing:1px;margin-bottom:14px;display:flex;align-items:center;gap:7px;}
+.ctitle::before{content:'';display:inline-block;width:5px;height:5px;border-radius:50%;background:var(--accent);}
+
+.aic{font-size:14px;line-height:1.8;color:var(--text2);}
+.aic h3{font-family:var(--fd);font-size:18px;color:var(--text);margin:18px 0 7px;font-style:italic;}
+.aic h3:first-child{margin-top:0;}
+.aic p{margin-bottom:11px;}
+.aic ul{padding-left:18px;margin-bottom:11px;}
+.aic li{margin-bottom:5px;}
+.aic strong{color:var(--text);font-weight:600;}
+
+.ld{display:flex;flex-direction:column;align-items:center;justify-content:center;padding:44px 20px;gap:12px;color:var(--text2);font-size:13px;}
+.spin{width:28px;height:28px;border:2px solid var(--border2);border-top-color:var(--accent);border-radius:50%;animation:sp .7s linear infinite;}
+@keyframes sp{to{transform:rotate(360deg);}}
+
+.ft{width:100%;border-collapse:collapse;font-size:12px;font-family:var(--fm);}
+.ft th{text-align:right;font-size:10px;color:var(--text3);text-transform:uppercase;letter-spacing:.5px;padding:7px 9px;border-bottom:1px solid var(--border);font-weight:400;}
+.ft th:first-child{text-align:left;}
+.ft td{padding:7px 9px;text-align:right;border-bottom:1px solid var(--border);color:var(--text2);}
+.ft td:first-child{text-align:left;color:var(--text);}
+.ft tr:last-child td{border-bottom:none;}
+.pos{color:var(--green)!important;}.neg{color:var(--red)!important;}
+
+.pt{width:100%;border-collapse:collapse;font-size:12px;}
+.pt th{text-align:right;font-size:10px;font-family:var(--fm);color:var(--text3);text-transform:uppercase;padding:7px 9px;border-bottom:1px solid var(--border);font-weight:400;}
+.pt th:first-child{text-align:left;}
+.pt td{padding:7px 9px;text-align:right;border-bottom:1px solid var(--border);color:var(--text2);font-family:var(--fm);}
+.pt td:first-child{text-align:left;color:var(--text);font-family:var(--fb);font-size:13px;}
+.pt tr.hl td{background:rgba(108,99,255,.07);}
+.pt tr.hl td:first-child{color:var(--accent2);font-weight:600;}
+.pt tr:last-child td{border-bottom:none;}
+
+.ni{padding:14px 0;border-bottom:1px solid var(--border);display:flex;gap:12px;align-items:flex-start;}
+.ni:last-child{border-bottom:none;}
+.ndot{width:7px;height:7px;border-radius:50%;background:var(--accent2);margin-top:5px;flex-shrink:0;}
+.ni h4{font-size:13px;color:var(--text);font-weight:500;margin-bottom:3px;}
+.ni p{font-size:12px;color:var(--text2);line-height:1.5;}
+.nmeta{font-size:11px;color:var(--text3);font-family:var(--fm);margin-top:4px;}
+
+.swg{display:grid;grid-template-columns:1fr 1fr;gap:11px;}
+.swb{border-radius:12px;padding:14px;}
+.swb.s{background:rgba(34,197,94,.08);border:1px solid rgba(34,197,94,.2);}
+.swb.w{background:rgba(239,68,68,.08);border:1px solid rgba(239,68,68,.2);}
+.swb.o{background:rgba(20,184,166,.08);border:1px solid rgba(20,184,166,.2);}
+.swb.t{background:rgba(245,158,11,.08);border:1px solid rgba(245,158,11,.2);}
+.swl{font-family:var(--fm);font-size:10px;text-transform:uppercase;letter-spacing:1px;margin-bottom:7px;font-weight:600;}
+.swb.s .swl{color:var(--green);}.swb.w .swl{color:var(--red);}
+.swb.o .swl{color:var(--teal);}.swb.t .swl{color:var(--amber);}
+.swb ul{padding-left:15px;font-size:12px;color:var(--text2);line-height:1.7;}
+
+.scdisp{display:flex;align-items:center;gap:28px;flex-wrap:wrap;}
+.sccircle{width:108px;height:108px;border-radius:50%;border:3px solid var(--border2);display:flex;flex-direction:column;align-items:center;justify-content:center;flex-shrink:0;}
+.scnum{font-family:var(--fd);font-size:34px;line-height:1;color:var(--text);}
+.sclbl{font-size:10px;color:var(--text3);font-family:var(--fm);}
+.sccrit{flex:1;display:flex;flex-direction:column;gap:9px;min-width:200px;}
+.crow{display:flex;align-items:center;gap:10px;}
+.cname{font-size:12px;color:var(--text2);width:155px;flex-shrink:0;}
+.cbar{flex:1;height:4px;background:var(--bg4);border-radius:2px;overflow:hidden;}
+.cfill{height:100%;border-radius:2px;background:var(--accent);}
+.cscore{font-family:var(--fm);font-size:12px;color:var(--text2);width:28px;text-align:right;}
+
+.vb{border-radius:14px;padding:22px;text-align:center;}
+.vb.uv{background:rgba(34,197,94,.08);border:1px solid rgba(34,197,94,.25);}
+.vb.ov{background:rgba(239,68,68,.08);border:1px solid rgba(239,68,68,.25);}
+.vb.fv{background:rgba(245,158,11,.08);border:1px solid rgba(245,158,11,.25);}
+.vlbl{font-family:var(--fm);font-size:10px;text-transform:uppercase;letter-spacing:1px;color:var(--text3);margin-bottom:7px;}
+.vres{font-family:var(--fd);font-size:24px;font-style:italic;}
+.vb.uv .vres{color:var(--green);}.vb.ov .vres{color:var(--red);}.vb.fv .vres{color:var(--amber);}
+.vdesc{font-size:13px;color:var(--text2);margin-top:7px;line-height:1.6;}
+
+.og{display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:10px;margin-top:14px;}
+.oi{background:var(--bg3);border:1px solid var(--border);border-radius:11px;padding:13px;}
+.oi h4{font-size:12px;color:var(--text);font-weight:600;margin-bottom:3px;}
+.oi p{font-size:11px;color:var(--text2);}
+.otype{font-family:var(--fm);font-size:9px;color:var(--teal);text-transform:uppercase;letter-spacing:.5px;margin-bottom:5px;}
+
+.badge{display:inline-block;font-size:11px;font-family:var(--fm);padding:3px 10px;border-radius:20px;margin:2px;}
+.bg{background:rgba(34,197,94,.12);color:var(--green);}
+.br{background:rgba(239,68,68,.12);color:var(--red);}
+.ba{background:rgba(245,158,11,.12);color:var(--amber);}
+.bb{background:rgba(108,99,255,.12);color:var(--accent2);}
+.errbox{background:rgba(239,68,68,.08);border:1px solid rgba(239,68,68,.2);border-radius:10px;padding:14px;font-size:13px;color:var(--red);}
+</style>
+</head>
+<body>
+
+<!-- GATE -->
+<div id="gate">
+  <div class="gate-card">
+    <div class="gate-logo">Stock<span>Lens</span></div>
+    <p class="gate-sub">Free AI-powered NSE/BSE analysis using Google Gemini.<br>1,500 free analyses per day — no payment needed.</p>
+
+    <div class="chrome-warn">
+      <strong>⚠ Use Google Chrome (not Edge)</strong>
+      Open this file in Chrome for it to work. Edge blocks API calls from local files.
+      Right-click the HTML file → Open with → Google Chrome.
+    </div>
+
+    <div class="steps-box">
+      <div class="step"><div class="snum">1</div><div>Go to <a href="https://aistudio.google.com/apikey" target="_blank">aistudio.google.com/apikey</a> — sign in with Google</div></div>
+      <div class="step"><div class="snum">2</div><div>Click <strong style="color:var(--text)">Create API key</strong> → choose any project</div></div>
+      <div class="step"><div class="snum">3</div><div>Copy the key — it may start with <code>AIzaSy</code> or <code>AQ</code> (both work)</div></div>
+      <div class="step"><div class="snum">4</div><div>Paste below and click <strong style="color:var(--text)">Start</strong></div></div>
+    </div>
+
+    <label class="gate-label">Gemini API Key (Free)</label>
+    <input type="password" class="gate-input" id="keyInput" placeholder="Paste your API key here (AIzaSy... or AQ...)" />
+    <div class="gate-err" id="gateErr">API key too short — paste the full key from Google AI Studio</div>
+    <button class="gate-btn" onclick="saveKey()">Start Analysing for Free →</button>
+    <p class="gate-note">Key stays in your browser only. Free tier: 1,500 requests/day.<br>
+    <a href="https://aistudio.google.com/apikey" target="_blank">Get free key here →</a></p>
+  </div>
+</div>
+
+<!-- APP -->
+<div id="app" style="display:none">
+  <header class="hdr">
+    <div class="logo">Stock<span>Lens</span></div>
+    <div class="hdr-right">
+      <span class="hdr-meta" id="hdrmeta">NSE · BSE · Gemini AI</span>
+      <button class="chg-btn" onclick="changeKey()">Change Key</button>
+    </div>
+  </header>
+
+  <div class="hero" id="hero">
+    <h1>Institutional-grade<br><em>stock research,</em> free.</h1>
+    <p>Search any NSE or BSE listed company. Full AI analysis in seconds.</p>
+    <div class="sw">
+      <span class="si-icon">🔍</span>
+      <input type="text" class="si" id="si" placeholder="Search company name or NSE ticker…" autocomplete="off">
+      <button class="sb" onclick="doSearch()">Analyse</button>
+      <div class="sugg" id="sugg"></div>
+    </div>
+    <div class="tags">
+      <span class="tag" onclick="qs('RELIANCE')">Reliance</span>
+      <span class="tag" onclick="qs('HDFCBANK')">HDFC Bank</span>
+      <span class="tag" onclick="qs('TCS')">TCS</span>
+      <span class="tag" onclick="qs('INFY')">Infosys</span>
+      <span class="tag" onclick="qs('TATAMOTORS')">Tata Motors</span>
+      <span class="tag" onclick="qs('WIPRO')">Wipro</span>
+      <span class="tag" onclick="qs('SUNPHARMA')">Sun Pharma</span>
+      <span class="tag" onclick="qs('BAJFINANCE')">Bajaj Finance</span>
+      <span class="tag" onclick="qs('ZOMATO')">Zomato</span>
+      <span class="tag" onclick="qs('ITC')">ITC</span>
+    </div>
+  </div>
+
+  <div class="dash" id="dash">
+    <div class="shdr">
+      <div class="shdr-top">
+        <div class="sname"><h2 id="sname">—</h2><span class="sbadge" id="sbadge">—</span></div>
+        <div class="sprice-block"><div class="sprice" id="sprice">—</div></div>
+      </div>
+      <div class="sqs" id="sqs"></div>
+    </div>
+
+    <div class="tabs">
+      <button class="tbtn active" onclick="tab('overview')">Overview</button>
+      <button class="tbtn" onclick="tab('news')">News & Announcements</button>
+      <button class="tbtn" onclick="tab('growth')">Growth</button>
+      <button class="tbtn" onclick="tab('analysis')">Company Analysis</button>
+      <button class="tbtn" onclick="tab('financials')">Financials</button>
+      <button class="tbtn" onclick="tab('operations')">Operations</button>
+      <button class="tbtn" onclick="tab('fundamental')">Fundamental</button>
+      <button class="tbtn" onclick="tab('valuation')">Valuation</button>
+      <button class="tbtn" onclick="tab('score')">Investment Score</button>
+    </div>
+
+    <div class="panel active" id="p-overview">
+      <div class="g2">
+        <div class="card"><div class="ctitle">About the Company</div><div id="c-about" class="aic"></div></div>
+        <div class="card"><div class="ctitle">Products & Services</div><div id="c-products" class="aic"></div></div>
+      </div>
+    </div>
+    <div class="panel" id="p-news"><div class="card"><div class="ctitle">Latest News & Announcements</div><div id="c-news"></div></div></div>
+    <div class="panel" id="p-growth"><div class="card"><div class="ctitle">Growth Plans & Future Outlook</div><div id="c-growth" class="aic"></div></div></div>
+    <div class="panel" id="p-analysis">
+      <div class="g2 mb18">
+        <div class="card"><div class="ctitle">Annual Report Summary</div><div id="c-annual" class="aic"></div></div>
+        <div class="card"><div class="ctitle">Concall Highlights</div><div id="c-concall" class="aic"></div></div>
+      </div>
+      <div class="card"><div class="ctitle">SWOT Analysis</div><div id="c-swot"></div></div>
+    </div>
+    <div class="panel" id="p-financials"><div class="card"><div class="ctitle">Profit & Loss — Detailed Analysis</div><div id="c-financials" class="aic"></div></div></div>
+    <div class="panel" id="p-operations"><div class="card"><div class="ctitle">Operations & Facilities</div><div id="c-operations" class="aic"></div></div></div>
+    <div class="panel" id="p-fundamental">
+      <div class="g2">
+        <div class="card"><div class="ctitle">Balance Sheet (3 Years)</div><div id="c-balance" class="aic"></div></div>
+        <div class="card"><div class="ctitle">Financial Health Conclusion</div><div id="c-health" class="aic"></div></div>
+      </div>
+    </div>
+    <div class="panel" id="p-valuation">
+      <div class="g2 mb18">
+        <div class="card"><div class="ctitle">Valuation Metrics</div><div id="c-valmetrics" class="aic"></div></div>
+        <div class="card"><div class="ctitle">Peer Comparison</div><div id="c-peers"></div></div>
+      </div>
+      <div class="card mt18"><div class="ctitle">Valuation Verdict</div><div id="c-verdict"></div></div>
+    </div>
+    <div class="panel" id="p-score">
+      <div class="card mb18"><div class="ctitle">Investment Score</div><div id="c-score"></div></div>
+      <div class="card"><div class="ctitle">Score Rationale</div><div id="c-score-rationale" class="aic"></div></div>
+    </div>
+  </div>
+</div>
+
+<script>
+// Use CORS proxy to avoid browser blocking Gemini API from local files
+
+const GEMINI_URL = k => `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${k}`;
+
+let GKEY = '';
+
+const STOCKS = [
+  {t:'RELIANCE',n:'Reliance Industries Ltd'},{t:'HDFCBANK',n:'HDFC Bank Ltd'},
+  {t:'TCS',n:'Tata Consultancy Services Ltd'},{t:'INFY',n:'Infosys Ltd'},
+  {t:'ICICIBANK',n:'ICICI Bank Ltd'},{t:'HINDUNILVR',n:'Hindustan Unilever Ltd'},
+  {t:'SBIN',n:'State Bank of India'},{t:'BHARTIARTL',n:'Bharti Airtel Ltd'},
+  {t:'WIPRO',n:'Wipro Ltd'},{t:'TATAMOTORS',n:'Tata Motors Ltd'},
+  {t:'SUNPHARMA',n:'Sun Pharmaceutical Industries Ltd'},{t:'BAJFINANCE',n:'Bajaj Finance Ltd'},
+  {t:'KOTAKBANK',n:'Kotak Mahindra Bank Ltd'},{t:'LT',n:'Larsen & Toubro Ltd'},
+  {t:'MARUTI',n:'Maruti Suzuki India Ltd'},{t:'AXISBANK',n:'Axis Bank Ltd'},
+  {t:'ADANIENT',n:'Adani Enterprises Ltd'},{t:'TATASTEEL',n:'Tata Steel Ltd'},
+  {t:'ONGC',n:'Oil & Natural Gas Corporation Ltd'},{t:'NTPC',n:'NTPC Ltd'},
+  {t:'POWERGRID',n:'Power Grid Corporation of India Ltd'},{t:'ULTRACEMCO',n:'UltraTech Cement Ltd'},
+  {t:'NESTLEIND',n:'Nestle India Ltd'},{t:'DRREDDY',n:"Dr. Reddy's Laboratories Ltd"},
+  {t:'TITAN',n:'Titan Company Ltd'},{t:'ASIANPAINT',n:'Asian Paints Ltd'},
+  {t:'BAJAJFINSV',n:'Bajaj Finserv Ltd'},{t:'HCLTECH',n:'HCL Technologies Ltd'},
+  {t:'MM',n:'Mahindra & Mahindra Ltd'},{t:'JSWSTEEL',n:'JSW Steel Ltd'},
+  {t:'CIPLA',n:'Cipla Ltd'},{t:'COALINDIA',n:'Coal India Ltd'},
+  {t:'TECHM',n:'Tech Mahindra Ltd'},{t:'ITC',n:'ITC Ltd'},
+  {t:'PIDILITIND',n:'Pidilite Industries Ltd'},{t:'INDUSINDBK',n:'IndusInd Bank Ltd'},
+  {t:'DABUR',n:'Dabur India Ltd'},{t:'EICHERMOT',n:'Eicher Motors Ltd'},
+  {t:'ZOMATO',n:'Zomato Ltd'},{t:'DMART',n:'Avenue Supermarts Ltd'},
+  {t:'IRCTC',n:'Indian Railway Catering & Tourism Corp'},{t:'TRENT',n:'Trent Ltd'},
+  {t:'SIEMENS',n:'Siemens Ltd'},{t:'POLYCAB',n:'Polycab India Ltd'},
+  {t:'LTIM',n:'LTIMindtree Ltd'},{t:'DIXON',n:'Dixon Technologies Ltd'},
+  {t:'HAVELLS',n:'Havells India Ltd'},{t:'GODREJCP',n:'Godrej Consumer Products Ltd'},
+  {t:'MARICO',n:'Marico Ltd'},{t:'BANDHANBNK',n:'Bandhan Bank Ltd'},
+  {t:'FEDERALBNK',n:'Federal Bank Ltd'},{t:'IDFCFIRSTB',n:'IDFC First Bank Ltd'},
+  {t:'PNB',n:'Punjab National Bank'},{t:'BANKBARODA',n:'Bank of Baroda'},
+  {t:'BPCL',n:'Bharat Petroleum Corporation Ltd'},{t:'IOC',n:'Indian Oil Corporation Ltd'},
+  {t:'GAIL',n:'GAIL (India) Ltd'},{t:'ADANIPORTS',n:'Adani Ports & SEZ Ltd'},
+  {t:'BRITANNIA',n:'Britannia Industries Ltd'},{t:'COLPAL',n:'Colgate-Palmolive India Ltd'},
+  {t:'AUROPHARMA',n:'Aurobindo Pharma Ltd'},{t:'LUPIN',n:'Lupin Ltd'},
+  {t:'INDIGO',n:'InterGlobe Aviation Ltd (IndiGo)'},{t:'HAL',n:'Hindustan Aeronautics Ltd'},
+  {t:'BEL',n:'Bharat Electronics Ltd'},{t:'BHEL',n:'Bharat Heavy Electricals Ltd'},
+  {t:'RECLTD',n:'REC Ltd'},{t:'PFC',n:'Power Finance Corporation Ltd'},
+  {t:'TATAPOWER',n:'Tata Power Company Ltd'},{t:'ADANIGREEN',n:'Adani Green Energy Ltd'},
+  {t:'IRFC',n:'Indian Railway Finance Corporation'},{t:'RVNL',n:'Rail Vikas Nigam Ltd'},
+  {t:'HINDZINC',n:'Hindustan Zinc Ltd'},{t:'VEDL',n:'Vedanta Ltd'},
+  {t:'SAIL',n:'Steel Authority of India Ltd'},{t:'NMDC',n:'NMDC Ltd'},
+  {t:'BERGEPAINT',n:'Berger Paints India Ltd'},{t:'TORNTPHARM',n:'Torrent Pharmaceuticals Ltd'},
+  {t:'DIVISLAB',n:"Divi's Laboratories Ltd"},{t:'BIOCON',n:'Biocon Ltd'},
+  {t:'GRASIM',n:'Grasim Industries Ltd'},{t:'CANBK',n:'Canara Bank'},
+  {t:'VOLTAS',n:'Voltas Ltd'},{t:'JSWENERGY',n:'JSW Energy Ltd'},
+  {t:'HINDPETRO',n:'Hindustan Petroleum Corp Ltd'},{t:'TRENT',n:'Trent Ltd'},
+];
+
+function saveKey(){
+  const k=document.getElementById('keyInput').value.trim();
+  const err=document.getElementById('gateErr');
+  if(k.length < 20){err.style.display='block';return;}
+  err.style.display='none';
+  GKEY=k;
+  sessionStorage.setItem('glens',k);
+  document.getElementById('gate').style.display='none';
+  document.getElementById('app').style.display='block';
+}
+function changeKey(){
+  GKEY='';sessionStorage.removeItem('glens');
+  document.getElementById('app').style.display='none';
+  document.getElementById('gate').style.display='flex';
+  document.getElementById('keyInput').value='';
+}
+window.addEventListener('load',()=>{
+  const s=sessionStorage.getItem('glens');
+  if(s){GKEY=s;document.getElementById('gate').style.display='none';document.getElementById('app').style.display='block';}
+  document.getElementById('keyInput').addEventListener('keydown',e=>{if(e.key==='Enter')saveKey();});
+  document.getElementById('si').addEventListener('keydown',e=>{if(e.key==='Enter')doSearch();if(e.key==='Escape')document.getElementById('sugg').classList.remove('show');});
+  document.getElementById('si').addEventListener('input',onInput);
+  document.addEventListener('click',e=>{if(!e.target.closest('.sw'))document.getElementById('sugg').classList.remove('show');});
+});
+
+function onInput(){
+  const q=document.getElementById('si').value.trim().toLowerCase();
+  const sb=document.getElementById('sugg');
+  if(!q){sb.classList.remove('show');return;}
+  const m=STOCKS.filter(s=>s.t.toLowerCase().includes(q)||s.n.toLowerCase().includes(q)).slice(0,7);
+  if(!m.length){sb.classList.remove('show');return;}
+  sb.innerHTML=m.map(s=>`<div class="sugg-item" onclick="qs('${s.t}')"><span class="stk">${s.t}</span><span style="font-size:12px;color:var(--text2)">${s.n}</span></div>`).join('');
+  sb.classList.add('show');
+}
+function doSearch(){
+  const q=document.getElementById('si').value.trim();
+  if(!q)return;
+  const m=STOCKS.find(s=>s.t.toLowerCase()===q.toLowerCase()||s.n.toLowerCase().includes(q.toLowerCase()));
+  qs(m?m.t:q.toUpperCase());
+}
+function qs(t){
+  document.getElementById('sugg').classList.remove('show');
+  document.getElementById('si').value=t;
+  analyse(t);
+}
+
+const TABS=['overview','news','growth','analysis','financials','operations','fundamental','valuation','score'];
+function tab(id){
+  document.querySelectorAll('.tbtn').forEach((b,i)=>b.classList.toggle('active',TABS[i]===id));
+  document.querySelectorAll('.panel').forEach(p=>p.classList.remove('active'));
+  document.getElementById('p-'+id).classList.add('active');
+}
+
+async function analyse(ticker){
+  const info=STOCKS.find(s=>s.t===ticker)||{t:ticker,n:ticker};
+  document.getElementById('hero').style.display='none';
+  document.getElementById('dash').classList.add('show');
+  document.getElementById('hdrmeta').textContent=ticker+' · Analysing…';
+  resetAll();
+
+  let sd={};
+  try{sd=await getScreener(ticker);}catch(e){}
+  updateHeader(ticker,info,sd);
+  document.getElementById('hdrmeta').textContent=ticker+' · Gemini AI';
+
+  const ctx=buildCtx(sd,ticker,info);
+  await Promise.all([
+    run(['about','products'],  pAbout(ticker,info,ctx)),
+    run(['news'],              pNews(ticker,info,ctx)),
+    run(['growth'],            pGrowth(ticker,info,ctx)),
+    run(['annual','concall','swot'], pAnalysis(ticker,info,ctx)),
+    run(['financials'],        pFin(ticker,info,ctx)),
+    run(['operations'],        pOps(ticker,info,ctx)),
+    run(['balance','health'],  pFund(ticker,info,ctx)),
+    run(['valmetrics','peers','verdict'], pVal(ticker,info,ctx)),
+    run(['score','score-rationale'], pScore(ticker,info,ctx)),
+  ]);
+}
+
+async function getScreener(ticker){
+  const url=`https://www.screener.in/company/${ticker}/consolidated/`;
+  const r=await fetch(`https://api.allorigins.win/get?url=${encodeURIComponent(url)}`);
+  const d=await r.json();
+  return parseScreener(d.contents);
+}
+function parseScreener(html){
+  if(!html)return{};
+  const doc=new DOMParser().parseFromString(html,'text/html');
+  const res={ratios:{},pros:[],cons:[],tables:{}};
+  const h1=doc.querySelector('h1');if(h1)res.name=h1.textContent.trim();
+  doc.querySelectorAll('#top-ratios li,.company-ratios li').forEach(li=>{
+    const n=li.querySelector('.name')?.textContent?.trim();
+    const v=li.querySelector('.nowrap,.value,.number')?.textContent?.trim();
+    if(n&&v)res.ratios[n]=v;
+  });
+  res.pros=[...doc.querySelectorAll('.pros li')].map(x=>x.textContent.trim()).filter(Boolean);
+  res.cons=[...doc.querySelectorAll('.cons li')].map(x=>x.textContent.trim()).filter(Boolean);
+  ['profit-loss','balance-sheet','quarters','ratios'].forEach(id=>{
+    const sec=doc.getElementById(id);if(!sec)return;
+    const rows=[...sec.querySelectorAll('tr')].map(tr=>[...tr.querySelectorAll('th,td')].map(c=>c.textContent.trim())).filter(r=>r.length>1);
+    if(rows.length)res.tables[id]=rows;
+  });
+  return res;
+}
+function buildCtx(d,ticker,info){
+  let c=`Company: ${d.name||info.n} (NSE: ${ticker})\n`;
+  if(d.ratios&&Object.keys(d.ratios).length)c+='Ratios: '+Object.entries(d.ratios).map(([k,v])=>`${k}=${v}`).join(', ')+'\n';
+  if(d.pros?.length)c+=`Pros: ${d.pros.slice(0,5).join('; ')}\n`;
+  if(d.cons?.length)c+=`Cons: ${d.cons.slice(0,5).join('; ')}\n`;
+  if(d.tables)Object.entries(d.tables).forEach(([n,rows])=>{c+=`\n[${n}]\n`;rows.slice(0,10).forEach(r=>c+=r.join('|')+'\n');});
+  return c;
+}
+function updateHeader(ticker,info,d){
+  document.getElementById('sname').textContent=d.name||info.n||ticker;
+  const p=d.ratios?.['Current Price']||'—';
+  document.getElementById('sprice').textContent=p!=='—'?'₹'+p:'—';
+  document.getElementById('sbadge').textContent=ticker+' · NSE/BSE';
+  const stats=[['Market Cap','Market Cap'],['P/E','Stock P/E'],['Book Value','Book Value'],['ROE','ROE'],['ROCE','ROCE'],['Div Yield','Dividend Yield'],['52W H/L','High / Low']];
+  document.getElementById('sqs').innerHTML=stats.map(([l,k])=>`<div class="qi"><label>${l}</label><span>${d.ratios?.[k]||'—'}</span></div>`).join('');
+}
+function resetAll(){
+  ['about','products','news','growth','annual','concall','swot','financials','balance','health','valmetrics','peers','verdict','score','score-rationale','operations']
+  .forEach(id=>{const e=document.getElementById('c-'+id);if(e)e.innerHTML='<div class="ld"><div class="spin"></div><span>Analysing…</span></div>';});
+}
+
+async function callGemini(prompt){
+  const body={
+    contents:[{parts:[{text:prompt}]}],
+    generationConfig:{temperature:0.7,maxOutputTokens:2048},
+    systemInstruction:{parts:[{text:`You are a senior Indian equity research analyst. Output clean HTML only using tags: h3 p ul li strong table tr th td div span. Use CSS classes exactly as given. No markdown, no backticks, no preamble. Raw HTML only.`}]}
+  };
+  const r=await fetch(GEMINI_URL(GKEY),{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)});
+  if(!r.ok){const e=await r.json();throw new Error(e.error?.message||`HTTP ${r.status}`);}
+  const d=await r.json();
+  return(d.candidates?.[0]?.content?.parts?.[0]?.text||'').replace(/```html|```/g,'').trim();
+}
+
+async function run(ids,prompt){
+  try{
+    const html=await callGemini(prompt);
+    place(ids,html);
+  }catch(e){
+    ids.forEach(id=>{const el=document.getElementById('c-'+id);if(el)el.innerHTML=`<div class="errbox">⚠ Error: ${e.message}</div>`;});
+  }
+}
+function place(ids,html){
+  if(ids.length===1){const e=document.getElementById('c-'+ids[0]);if(e)e.innerHTML=html;return;}
+  ids.forEach((id,i)=>{
+    const marker=`[${id.toUpperCase().replace(/-/g,'_')}]`;
+    const start=html.indexOf(marker);
+    if(start===-1){if(i===0){const e=document.getElementById('c-'+id);if(e)e.innerHTML=html;}return;}
+    const nexts=ids.filter((_,j)=>j>i).map(oid=>html.indexOf(`[${oid.toUpperCase().replace(/-/g,'_')}]`)).filter(x=>x>start);
+    const end=nexts.length?Math.min(...nexts):html.length;
+    const e=document.getElementById('c-'+id);if(e)e.innerHTML=html.slice(start+marker.length,end).trim();
+  });
+}
+
+// PROMPTS
+function pAbout(t,info,ctx){return`Analyse ${info.n} (${t}).\nData:\n${ctx}\nOutput markers [ABOUT] and [PRODUCTS] on their own lines.\n[ABOUT]\n3 paragraphs: history, business model, market position. Include founding year, HQ, promoters, numbers.\n[PRODUCTS]\nMain products/services: <ul><li><strong>Name:</strong> description, revenue contribution</li></ul> Cover 5-7 items.`;}
+function pNews(t,info,ctx){return`${info.n} (${t}) news.\nData:\n${ctx}\nWrite 8 realistic news items for last 6 months. Mix: quarterly results, orders, expansions, regulatory, partnerships.\nEach: <div class="ni"><div class="ndot"></div><div><h4>Headline</h4><p>Impact description 2-3 sentences.</p><div class="nmeta">Month Year · Category</div></div></div>`;}
+function pGrowth(t,info,ctx){return`Growth outlook for ${info.n} (${t}).\nData:\n${ctx}\n<h3>Near-term Catalysts (0-12 Months)</h3><p>Specific triggers with numbers.</p><h3>Medium-term Strategy (1-3 Years)</h3><p>Expansion, capex, pipeline.</p><h3>Long-term Vision (3-5 Years)</h3><p>Goals, market opportunity.</p><h3>Management Guidance</h3><p>Revenue/margin targets.</p><h3>Key Risks</h3><ul><li>5 specific risks</li></ul>`;}
+function pAnalysis(t,info,ctx){return`Analysis of ${info.n} (${t}).\nData:\n${ctx}\nOutput markers [ANNUAL] [CONCALL] [SWOT] on their own lines.\n[ANNUAL]\nFY23 vs FY24 comparison. Use h3 per year. Revenue, profit, margins, strategy. Specific ₹Cr numbers.\n[CONCALL]\n<h3>Management Commentary</h3><h3>Guidance</h3><h3>Key Q&A</h3><h3>Concerns</h3>\n[SWOT]\n<div class="swg"><div class="swb s"><div class="swl">Strengths</div><ul><li>5 items</li></ul></div><div class="swb w"><div class="swl">Weaknesses</div><ul><li>4 items</li></ul></div><div class="swb o"><div class="swl">Opportunities</div><ul><li>4 items</li></ul></div><div class="swb t"><div class="swl">Threats</div><ul><li>4 items</li></ul></div></div>`;}
+function pFin(t,info,ctx){return`P&L for ${info.n} (${t}).\nData:\n${ctx}\n<table class="ft"><tr><th>Metric (₹ Cr)</th><th>FY22</th><th>FY23</th><th>FY24</th><th>YoY%</th><th>Q3FY25</th><th>Q4FY25</th></tr>[rows for Revenue,Gross Profit,EBITDA,EBITDA%,PAT,PAT%,EPS — use class pos/neg for YoY]</table><h3>Revenue Analysis</h3><p>Drivers, segments.</p><h3>Margin Analysis</h3><p>Trends, reasons.</p><h3>Earnings Quality</h3><p>One-offs, cash conversion.</p><h3>Key Takeaways</h3><ul><li>4 investor points</li></ul>`;}
+function pOps(t,info,ctx){return`Operations for ${info.n} (${t}).\nData:\n${ctx}\n<h3>Business Model</h3><p>Revenue generation, key segments.</p><h3>Geographic Presence</h3><p>States, countries, markets.</p><h3>Scale</h3><p>Employees, facilities, customers.</p><div class="og">[6-8: <div class="oi"><div class="otype">TYPE</div><h4>Name</h4><p>Description.</p></div>]</div><h3>Supply Chain</h3><p>Suppliers, distribution.</p>`;}
+function pFund(t,info,ctx){return`Fundamental for ${info.n} (${t}).\nData:\n${ctx}\nMarkers [BALANCE] [HEALTH] on their own lines.\n[BALANCE]\n<table class="ft"><tr><th>Item (₹ Cr)</th><th>FY22</th><th>FY23</th><th>FY24</th><th>Trend</th></tr>[Total Assets,Net Fixed Assets,Current Assets,Equity,Reserves,Total Debt,Current Liabilities,Net Worth,D/E,Current Ratio,Interest Coverage]</table><p>Commentary on movements.</p>\n[HEALTH]\n<h3>Solvency</h3><h3>Liquidity</h3><h3>Asset Efficiency</h3><h3>Capital Efficiency</h3><h3>Verdict</h3><p>With badge: <span class="badge bg">Financially Strong</span> or <span class="badge ba">Moderate Risk</span> or <span class="badge br">High Risk</span></p>`;}
+function pVal(t,info,ctx){return`Valuation for ${info.n} (${t}).\nData:\n${ctx}\nMarkers [VALMETRICS] [PEERS] [VERDICT] on their own lines.\n[VALMETRICS]\n<table class="ft"><tr><th>Metric</th><th>Current</th><th>1Y Ago</th><th>Sector Avg</th><th>View</th></tr>[P/E,P/B,EV/EBITDA,Price/Sales,Mkt Cap ₹Cr,Div Yield%,PEG]</table><h3>Commentary</h3><p>Premium/discount to peers.</p>\n[PEERS]\n<table class="pt"><tr><th>Company</th><th>Mkt Cap</th><th>P/E</th><th>P/B</th><th>ROE%</th><th>PAT Margin%</th></tr>[5-6 rows, add class="hl" to ${t} row]</table>\n[VERDICT]\n<div class="vb uv"><div class="vlbl">Valuation Verdict</div><div class="vres">Undervalued</div><div class="vdesc">Reasoning with numbers, upside%, triggers.</div></div>`;}
+function pScore(t,info,ctx){return`Investment score for ${info.n} (${t}).\nData:\n${ctx}\nMarkers [SCORE] [SCORE_RATIONALE] on their own lines.\n[SCORE]\nScore each out of 100 (be honest and differentiated): Growth, Profitability, Solvency, Management Execution, Sector Tailwinds, MOAT. Total=weighted avg.\n<div class="scdisp"><div class="sccircle"><div class="scnum">XX</div><div class="sclbl">/ 100</div></div><div class="sccrit"><div class="crow"><div class="cname">Growth</div><div class="cbar"><div class="cfill" style="width:XX%"></div></div><div class="cscore">XX</div></div><div class="crow"><div class="cname">Profitability</div><div class="cbar"><div class="cfill" style="width:XX%"></div></div><div class="cscore">XX</div></div><div class="crow"><div class="cname">Solvency</div><div class="cbar"><div class="cfill" style="width:XX%"></div></div><div class="cscore">XX</div></div><div class="crow"><div class="cname">Management Execution</div><div class="cbar"><div class="cfill" style="width:XX%"></div></div><div class="cscore">XX</div></div><div class="crow"><div class="cname">Sector Tailwinds</div><div class="cbar"><div class="cfill" style="width:XX%"></div></div><div class="cscore">XX</div></div><div class="crow"><div class="cname">MOAT</div><div class="cbar"><div class="cfill" style="width:XX%"></div></div><div class="cscore">XX</div></div></div></div>\n[SCORE_RATIONALE]\n<h3>What's Working</h3><ul><li>3-4 points</li></ul><h3>Areas of Concern</h3><ul><li>2-3 points</li></ul><h3>Investment Thesis</h3><p>Buy/hold/avoid with specific reasoning and numbers.</p><h3>Ideal For</h3><p><span class="badge bb">Long-term</span> <span class="badge bg">Dividend</span> etc.</p>`;}
+</script>
+</body>
+</html>
